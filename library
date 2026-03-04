@@ -66,7 +66,7 @@ local concat = table.concat
 
 -- library init
 local library = {
-    directory = "raeleigh",
+    directory = "amethyst",
     folders = {
         "/fonts",
         "/configs",
@@ -399,7 +399,7 @@ local config_holder
             ins[_] = v
         end 
 
-        insert(raeleigh.drawings, ins)
+        insert(amethyst.drawings, ins)
 
         return ins 
     end 
@@ -411,7 +411,7 @@ local config_holder
             ins[_] = v
         end 
 
-        insert(raeleigh.instances, ins)
+        insert(amethyst.instances, ins)
 
         return ins 
     end 
@@ -1523,7 +1523,7 @@ local config_holder
 
         -- main window
             local main_window = library:panel({
-                name = properties and properties.name or "raeleigh | ", 
+                name = properties and properties.name or "amethyst | ", 
                 size = dim2(0, 604, 0, 628),
                 position = dim2(0, (camera.ViewportSize.X / 2) - 302 - 96, 0, (camera.ViewportSize.Y / 2) - 421 - 12),
                 image = "rbxassetid://98823308062942",
@@ -1628,11 +1628,11 @@ local config_holder
                 image = "rbxassetid://115194686863276",
             })
 
-            local watermark = library:watermark({default = os.date('raeleigh |  - %b %d %Y - %H:%M:%S')})  
+            local watermark = library:watermark({default = os.date('amethyst |  - %b %d %Y - %H:%M:%S')})  
 
             task.spawn(function()
                 while task.wait(1) do 
-                    watermark.change_text(os.date('raeleigh - Beta - %b %d %Y - %H:%M:%S'))
+                    watermark.change_text(os.date('amethyst - Beta - %b %d %Y - %H:%M:%S'))
                 end 
             end) 
 
@@ -5923,7 +5923,7 @@ local config_holder
 -- 
 
 -- documentation 
-local window = library:window({name = os.date('raeleigh |  - %b %d %Y'), size = dim2(0, 750, 0, 782)})
+local window = library:window({name = os.date('amethyst |  - %b %d %Y'), size = dim2(0, 750, 0, 782)})
 
 local Aiming = window:tab({name = "Aiming"})
 local Misc = window:tab({name = "Misc"})

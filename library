@@ -1525,10 +1525,11 @@ local config_holder
         --  
 
         -- main window
+            local win_size = (properties and properties.size) or dim2(0, 604, 0, 628)
             local main_window = library:panel({
                 name = properties and properties.name or "amethyst | ", 
-                size = dim2(0, 604, 0, 628),
-                position = dim2(0, (camera.ViewportSize.X / 2) - 302 - 96, 0, (camera.ViewportSize.Y / 2) - 421 - 12),
+                size = win_size,
+                position = dim2(0, (camera.ViewportSize.X / 2) - (win_size.X.Offset / 2) - 96, 0, (camera.ViewportSize.Y / 2) - (win_size.Y.Offset / 2) - 12),
                 image = "rbxassetid://98823308062942",
             })
 

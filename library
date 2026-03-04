@@ -1771,10 +1771,10 @@ local config_holder
                 end})
                 section:button_holder({})
                 section:button({name = "Unload Config", callback = function()
-                    library:load_config(library.old_config)
+                    if library.old_config then library:load_config(library.old_config) end
                 end})
                 section:button({name = "Unload Menu", callback = function()
-                    library:load_config(library.old_config)
+                    if library.old_config then library:load_config(library.old_config) end
 
                     for _, gui in library.guis do 
                         gui:Destroy() 

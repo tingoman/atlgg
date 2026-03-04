@@ -67,6 +67,9 @@ local concat = table.concat
 -- library init
 local library = {
     directory = "amethyst",
+    supported_games = {
+        [9825515356] = "Hood Customs",
+    },
     folders = {
         "/fonts",
         "/configs",
@@ -1631,8 +1634,9 @@ local config_holder
             local watermark = library:watermark({default = os.date('amethyst |  - %b %d %Y - %H:%M:%S')})  
 
             task.spawn(function()
+                local game_label = library.supported_games[game.PlaceId] or "Universal"
                 while task.wait(1) do 
-                    watermark.change_text(os.date('amethyst - Beta - %b %d %Y - %H:%M:%S'))
+                    watermark.change_text(os.date('amethyst - ' .. game_label .. ' - %b %d %Y - %H:%M:%S'))
                 end 
             end) 
 
@@ -1876,7 +1880,7 @@ local config_holder
             FontFace = library.font,
             TextColor3 = themes.preset.text,
             BorderColor3 = rgb(0, 0, 0),
-            Text = "  drain.lol | Beta | Aug 29 2024 | 07:29:00  ",
+            Text = "  drain.lol | Aug 29 2024 | 07:29:00  ",
             Size = dim2(0, 0, 1, 0),
             BackgroundTransparency = 1,
             Position = dim2(0, -1, 0, 1),

@@ -82,6 +82,7 @@ local library = {
     connections = {},   
     notifications = {},
     playerlist_data = {},
+    priority_saves = {},
 
     current_tab, 
     current_element_open, 
@@ -102,14 +103,14 @@ local config_flags = library.config_flags
 
 local themes = {
     preset = {
-        ["outline"] = hex("#0A0A0A"), -- 
-        ["inline"] = hex("#2D2D2D"), --
-        ["accent"] = hex("#6078BE"), --
-        ["high_contrast"] = hex("#141414"),
-        ["low_contrast"] = hex("#1E1E1E"),
-        ["text"] = hex("#B4B4B4"),
+        ["outline"] = hex("#0A0A0A"),
+        ["inline"] = hex("#2D1A20"),
+        ["accent"] = hex("#E05B7F"),
+        ["high_contrast"] = hex("#160A0F"),
+        ["low_contrast"] = hex("#1E1015"),
+        ["text"] = hex("#D4A4B4"),
         ["text_outline"] = rgb(0, 0, 0),
-        ["glow"] = hex("#6078BE"), 
+        ["glow"] = hex("#E05B7F"),
     },
 
     utility = {
@@ -1645,6 +1646,117 @@ local config_holder
 
             local column = setmetatable(items, library):column() 
             local section = column:section({name = "Theme"})
+
+            local theme_presets = {
+                ["Atlanta"] = {
+                    accent        = hex("#6078BE"),
+                    outline       = hex("#0A0A0A"),
+                    inline        = hex("#2D2D2D"),
+                    high_contrast = hex("#141414"),
+                    low_contrast  = hex("#1E1E1E"),
+                    text          = hex("#B4B4B4"),
+                    text_outline  = rgb(0, 0, 0),
+                    glow          = hex("#6078BE"),
+                },
+                ["Amethyst"] = {
+                    accent        = hex("#9B6FD4"),
+                    outline       = hex("#0A0A0A"),
+                    inline        = hex("#2A1F3D"),
+                    high_contrast = hex("#120D1E"),
+                    low_contrast  = hex("#1A1228"),
+                    text          = hex("#C4B4D4"),
+                    text_outline  = rgb(0, 0, 0),
+                    glow          = hex("#9B6FD4"),
+                },
+                ["Rose"] = {
+                    accent        = hex("#E05B7F"),
+                    outline       = hex("#0A0A0A"),
+                    inline        = hex("#2D1A20"),
+                    high_contrast = hex("#160A0F"),
+                    low_contrast  = hex("#1E1015"),
+                    text          = hex("#D4A4B4"),
+                    text_outline  = rgb(0, 0, 0),
+                    glow          = hex("#E05B7F"),
+                },
+                ["Emerald"] = {
+                    accent        = hex("#4CAF85"),
+                    outline       = hex("#0A0A0A"),
+                    inline        = hex("#1A2D25"),
+                    high_contrast = hex("#0D1610"),
+                    low_contrast  = hex("#121E18"),
+                    text          = hex("#A4D4BC"),
+                    text_outline  = rgb(0, 0, 0),
+                    glow          = hex("#4CAF85"),
+                },
+                ["Gold"] = {
+                    accent        = hex("#D4A43C"),
+                    outline       = hex("#0A0A0A"),
+                    inline        = hex("#2D2515"),
+                    high_contrast = hex("#160F05"),
+                    low_contrast  = hex("#1E180A"),
+                    text          = hex("#D4C484"),
+                    text_outline  = rgb(0, 0, 0),
+                    glow          = hex("#D4A43C"),
+                },
+                ["Crimson"] = {
+                    accent        = hex("#DC3545"),
+                    outline       = hex("#0A0A0A"),
+                    inline        = hex("#2D1515"),
+                    high_contrast = hex("#160808"),
+                    low_contrast  = hex("#1E0D0D"),
+                    text          = hex("#D4A4A4"),
+                    text_outline  = rgb(0, 0, 0),
+                    glow          = hex("#DC3545"),
+                },
+                ["Cyan"] = {
+                    accent        = hex("#38BCD4"),
+                    outline       = hex("#0A0A0A"),
+                    inline        = hex("#1A2A2D"),
+                    high_contrast = hex("#0D1416"),
+                    low_contrast  = hex("#121C1E"),
+                    text          = hex("#A4CCD4"),
+                    text_outline  = rgb(0, 0, 0),
+                    glow          = hex("#38BCD4"),
+                },
+            }
+
+            local function apply_theme_preset(name)
+                local p = theme_presets[name]
+                if not p then return end
+                if not library.config_flags["Accent"] then return end
+                local function set(flag, color)
+                    if library.config_flags[flag] then
+                        library.config_flags[flag](color, 1)
+                    end
+                end
+                set("Accent",        p.accent)
+                set("low_contrast",  p.low_contrast)
+                set("high_contrast", p.high_contrast)
+                set("Inline",        p.inline)
+                set("Outline",       p.outline)
+                set("Main",          p.text)
+                set("Glow",          p.glow)
+                library:update_theme("text_outline", p.text_outline)
+                library:update_theme("contrast", rgbseq{
+                    rgbkey(0, p.low_contrast),
+                    rgbkey(1, p.high_contrast)
+                })
+            end
+
+            local preset_names = {}
+            for k in next, theme_presets do preset_names[#preset_names + 1] = k end
+            table.sort(preset_names)
+
+            section:dropdown({
+                name = "Preset",
+                items = preset_names,
+                default = "Rose",
+                flag = "theme_preset",
+                callback = function(name)
+                    apply_theme_preset(name)
+                end
+            })
+
             section:label({name = "Accent"})
             :colorpicker({name = "Accent", color = themes.preset.accent, flag = "accent", callback = function(color, alpha)
                 library:update_theme("accent", color)
@@ -1776,6 +1888,8 @@ local config_holder
                 end})
                 section:button({name = "Unload Menu", callback = function()
                     if library.old_config then library:load_config(library.old_config) end
+
+                    if library.on_unload then pcall(library.on_unload) end
 
                     for _, gui in library.guis do 
                         gui:Destroy() 
@@ -2280,7 +2394,8 @@ local config_holder
                 return 
             end
 
-            local humanoid = character.Humanoid
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if not humanoid then return end
             
             local multiplier = humanoid.MaxHealth * math.abs(math.sin(tick() * 2)) / humanoid.MaxHealth
             local color = flags[ "Health_Low" ].Color:Lerp( flags["Health_High"].Color, multiplier)
@@ -2589,8 +2704,10 @@ local config_holder
             if library.current_tab and library.current_tab[1] ~= background then 
                 local button = library.current_tab[1]
                 button.Size = dim2(1, -2, 1, -1)
-                button:FindFirstChildOfClass("UIGradient").Rotation = 90
-                button:FindFirstChildOfClass("TextLabel").TextColor3 = themes.preset.text
+                local ug = button:FindFirstChildOfClass("UIGradient")
+                if ug then ug.Rotation = 90 end
+                local tl = button:FindFirstChildOfClass("TextLabel")
+                if tl then tl.TextColor3 = themes.preset.text end
                     
                 library.current_tab[2].Visible = false
                 
@@ -2603,8 +2720,10 @@ local config_holder
             
             local button = library.current_tab[1] 
             button.Size = dim2(1, -2, 1, 0) -- ENABLED
-            button:FindFirstChildOfClass("UIGradient").Rotation = -90
-            button:FindFirstChildOfClass("TextLabel").TextColor3 = themes.preset.accent 
+            local ug = button:FindFirstChildOfClass("UIGradient")
+            if ug then ug.Rotation = -90 end
+            local tl = button:FindFirstChildOfClass("TextLabel")
+            if tl then tl.TextColor3 = themes.preset.accent end 
 
             library.current_tab[2].Visible = true 
 
@@ -5582,6 +5701,7 @@ local config_holder
             ["Neutral"] = themes.preset.text,
             ["Friendly"] = rgb(0, 255, 255)
         }
+        local save_friendlies
 
         -- elements 
             local playerlist_holder = library:create("TextLabel", {
@@ -5725,8 +5845,9 @@ local config_holder
         -- 
 
         function cfg.create_player(player) 
-            library.playerlist_data[tostring(player)] = {}
-            local path = library.playerlist_data[tostring(player)]
+            local username = tostring(player)
+            library.playerlist_data[username] = {}
+            local path = library.playerlist_data[username]
             
             local TextButton = library:create("TextButton", {
                 Parent = ScrollingFrame,
@@ -5748,7 +5869,7 @@ local config_holder
                 FontFace = library.font,
                 TextColor3 = themes.preset.text,
                 BorderColor3 = rgb(0, 0, 0),
-                Text = tostring(player),
+                Text = player.DisplayName,
                 BorderSizePixel = 0,
                 BackgroundTransparency = 1,
                 TextXAlignment = Enum.TextXAlignment.Left,
@@ -5790,9 +5911,9 @@ local config_holder
                 Parent = TextButton,
                 Name = "",
                 FontFace = library.font,
-                TextColor3 = tostring(player) ~= lp.Name and themes.preset.text or rgb(0, 0, 255),
+                TextColor3 = username ~= lp.Name and themes.preset.text or rgb(0, 0, 255),
                 BorderColor3 = rgb(0, 0, 0),
-                Text = tostring(player) ~= lp.Name and "Neutral" or "LocalPlayer",
+                Text = username ~= lp.Name and "Neutral" or "LocalPlayer",
                 BackgroundTransparency = 1,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 BorderSizePixel = 0,
@@ -5840,10 +5961,26 @@ local config_holder
             path.line = line 
             path.priority = "Neutral"
             path.priority_text = priority_text
-            -- library.selected_player = players[tostring(player)]
-            
+
+            local saved_priority = library.priority_saves[player.UserId]
+            if saved_priority then
+                path.priority = saved_priority
+                priority_text.Text = saved_priority
+                priority_text.TextColor3 = patterns[saved_priority]
+            elseif username ~= lp.Name then
+                task.spawn(function()
+                    local ok, is_friend = pcall(function() return lp:IsFriendsWith(player.UserId) end)
+                    if ok and is_friend and not library.priority_saves[player.UserId] then
+                        path.priority = "Friendly"
+                        priority_text.Text = "Friendly"
+                        priority_text.TextColor3 = patterns["Friendly"]
+                        library.priority_saves[player.UserId] = "Friendly"
+                    end
+                end)
+            end
+
             TextButton.MouseButton1Click:Connect(function()
-                if player_name == lp.Name then 
+                if username == lp.Name then 
                     return 
                 end 
 
@@ -5855,13 +5992,13 @@ local config_holder
                 selected_button = player_name 
                 player_name.TextColor3 = themes.preset.accent 
 
-                library.selected_player = player_name.Text
+                library.selected_player = username
                 library.config_flags["PLAYERLIST_DROPDOWN"](path.priority_text.Text)
 
                 if cfg.labels.name then 
-                    cfg.labels.name.set("User: " .. player_name.Text)
-                    cfg.labels.display.set("DisplayName: " .. players[player_name.Text].DisplayName)
-                    cfg.labels.uid.set("User Id: " .. players[player_name.Text].UserId)
+                    cfg.labels.name.set("User: " .. username)
+                    cfg.labels.display.set("DisplayName: " .. players[username].DisplayName)
+                    cfg.labels.uid.set("User Id: " .. players[username].UserId)
                 end
             end)
 
@@ -5869,14 +6006,16 @@ local config_holder
         end 
 
         function cfg.search(text)
+            local lower_text = string.lower(text)
             for _, player in next, players:GetPlayers() do 
                 local name = tostring(player)
                 local path = library.playerlist_data[name]
 
                 if path then 
-                    local sanity = string.lower(name):match(string.lower(text)) and true or false
-                    path.instance.Visible = sanity
-                    path.line.Visible = sanity
+                    local match = string.lower(name):find(lower_text, 1, true)
+                        or string.lower(player.DisplayName):find(lower_text, 1, true)
+                    path.instance.Visible = match ~= nil
+                    path.line.Visible = match ~= nil
                 end 
             end 
         end 
@@ -5888,6 +6027,32 @@ local config_holder
             path = nil 
         end 
 
+        local http = game:GetService("HttpService")
+        local friendly_file = library.directory .. "/friendlies.json"
+
+        save_friendlies = function()
+            local list = {}
+            for uid, pri in pairs(library.priority_saves) do
+                if pri == "Friendly" then
+                    list[#list + 1] = tostring(uid)
+                end
+            end
+            pcall(function()
+                writefile(friendly_file, http:JSONEncode(list))
+            end)
+        end
+
+        pcall(function()
+            local content = readfile(friendly_file)
+            local list = http:JSONDecode(content)
+            if type(list) == "table" then
+                for _, uid_str in ipairs(list) do
+                    local uid = tonumber(uid_str) or uid_str
+                    library.priority_saves[uid] = "Friendly"
+                end
+            end
+        end)
+
         function library.prioritize(text) 
             if not library.selected_player then 
                 return 
@@ -5897,6 +6062,12 @@ local config_holder
             path.priority_text.Text = text
             path.priority_text.TextColor3 = patterns[text]
             path.priority = text
+
+            local player_obj = players:FindFirstChild(library.selected_player)
+            if player_obj then
+                library.priority_saves[player_obj.UserId] = text
+            end
+            save_friendlies()
         end 
 
         function library.get_priority(player) 
@@ -5911,7 +6082,7 @@ local config_holder
         players.PlayerRemoving:Connect(cfg.remove_player)
         
         for _, player in players:GetPlayers() do 
-            local player_object = cfg.create_player(player.Name)
+            local player_object = cfg.create_player(player)
             insert(library.playerlist_data, player_object)
         end 
 
@@ -5941,5 +6112,6 @@ library.vec3          = vec3
 library.rgb           = rgb
 library.hex           = hex
 library.flags         = flags
+library.themes        = themes
 
 return library

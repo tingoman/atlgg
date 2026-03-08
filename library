@@ -111,6 +111,7 @@ local themes = {
         ["text"] = hex("#D4A4B4"),
         ["text_outline"] = rgb(0, 0, 0),
         ["glow"] = hex("#E05B7F"),
+        ["risky"] = rgb(255, 80, 80),
     },
 
     utility = {
@@ -133,6 +134,9 @@ local themes = {
         },
         ["text"] = {
             ["TextColor3"] = {}, 	
+        },
+        ["risky"] = {
+            ["TextColor3"] = {},
         },
         ["text_outline"] = {
             ["Color"] = {}, 	
@@ -1658,6 +1662,16 @@ local config_holder
                     text_outline  = rgb(0, 0, 0),
                     glow          = hex("#6078BE"),
                 },
+                ["Atlanta2"] = {
+                    accent        = rgb(154, 127, 172),
+                    outline       = rgb(53, 53, 67),
+                    inline        = rgb(42, 42, 56),
+                    high_contrast = rgb(36, 36, 47),
+                    low_contrast  = rgb(42, 42, 56),
+                    text          = rgb(200, 200, 200),
+                    text_outline  = rgb(0, 0, 0),
+                    glow          = rgb(154, 127, 172),
+                },
                 ["Amethyst"] = {
                     accent        = hex("#9B6FD4"),
                     outline       = hex("#0A0A0A"),
@@ -1794,7 +1808,7 @@ local config_holder
             end, flag = "Main"})
             :colorpicker({name = "Outline", color = themes.preset.text_outline, callback = function(color, alpha)
                 library:update_theme("text_outline", color)
-            end, flag = "Outline"})
+            end, flag = "Text Outline"})
             section:label({name = "Glow"})
             :colorpicker({name = "Glow", color = themes.preset.glow, callback = function(color, alpha)
                 library:update_theme("glow", color)
@@ -1806,7 +1820,7 @@ local config_holder
             end})
             local section = column:section({name = "Other"})
             section:label({name = "UI Bind"})
-            :keybind({callback = window.set_menu_visibility, key = Enum.KeyCode.Insert})
+            :keybind({callback = window.set_menu_visibility, key = Enum.KeyCode.Delete})
             section:toggle({name = "Keybind List", flag = "keybind_list", callback = function(bool)
                 library.keybind_list_frame.Visible = bool
             end})
@@ -2048,6 +2062,15 @@ local config_holder
 
     function library:esp_preview(properties)
         local cfg = {items = {}, rotation = 0; objects = {};}
+        local amethyst = getgenv and getgenv().amethyst
+        local names_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Names"]
+        local boxes_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Boxes"]
+        local dist_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Distance"]
+        local weapon_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Weapon"]
+        local function esp_color(fc, key)
+            if not fc or not fc["Colors"] then return rgb(255, 255, 255) end
+            return fc["Colors"][key or "Neutral"] or fc["Colors"]["Neutral"] or rgb(255, 255, 255)
+        end
 
         lp.Character.Archivable = true
         local character = lp.Character:Clone()
@@ -2107,7 +2130,7 @@ local config_holder
             objects[ "name" ] = library:create( "TextLabel" , {
                 FontFace = library.font;
                 Parent = library.cache;
-                TextColor3 = flags["Name_Color"].Color;
+                TextColor3 = esp_color(names_cfg, "Neutral");
                 BorderColor3 = rgb(0, 0, 0);
                 Text = string.format("%s (@%s)", lp.DisplayName, lp.Name);
                 Name = "\0";
@@ -2132,6 +2155,17 @@ local config_holder
                 BackgroundColor3 = rgb(255, 255, 255)
             });
             
+            objects[ "box_fill" ] = library:create( "Frame" , {
+                Parent = objects[ "box_handler" ];
+                Name = "\0";
+                BackgroundTransparency = 0.7;
+                Position = dim2(0, 1, 0, 1);
+                BorderSizePixel = 0;
+                Size = dim2(1, -2, 1, -2);
+                BorderColor3 = rgb(0, 0, 0);
+                BackgroundColor3 = rgb(255, 255, 255)
+            });
+
             objects[ "box_color" ] = library:create( "UIStroke" , {
                 Color = rgb(255, 255, 255);
                 LineJoinMode = Enum.LineJoinMode.Miter;
@@ -2184,7 +2218,7 @@ local config_holder
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -2, 1, -2);
                     BorderSizePixel = 0;
-                    BackgroundColor3 = flags["Box_Color"].Color
+                    BackgroundColor3 = esp_color(boxes_cfg, "Neutral")
                 });
                 
                 objects[ "2" ] = library:create( "Frame" , {
@@ -2203,7 +2237,7 @@ local config_holder
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -2, 1, 1);
                     BorderSizePixel = 0;
-                    BackgroundColor3 = flags["Box_Color"].Color
+                    BackgroundColor3 = esp_color(boxes_cfg, "Neutral")
                 });
                 
                 objects[ "3" ] = library:create( "Frame" , {
@@ -2223,7 +2257,7 @@ local config_holder
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -2, 1, -2);
                     BorderSizePixel = 0;
-                    BackgroundColor3 = flags["Box_Color"].Color
+                    BackgroundColor3 = esp_color(boxes_cfg, "Neutral")
                 });
                 
                 objects[ "4" ] = library:create( "Frame" , {
@@ -2243,7 +2277,7 @@ local config_holder
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -2, 1, 1);
                     BorderSizePixel = 0;
-                    BackgroundColor3 = flags["Box_Color"].Color
+                    BackgroundColor3 = esp_color(boxes_cfg, "Neutral")
                 });
                 
                 objects[ "5" ] = library:create( "Frame" , {
@@ -2263,7 +2297,7 @@ local config_holder
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -2, 1, -2);
                     BorderSizePixel = 0;
-                    BackgroundColor3 = flags["Box_Color"].Color
+                    BackgroundColor3 = esp_color(boxes_cfg, "Neutral")
                 });
                 
                 objects[ "6" ] = library:create( "Frame" , {
@@ -2284,7 +2318,7 @@ local config_holder
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -2, 1, 1);
                     BorderSizePixel = 0;
-                    BackgroundColor3 = flags["Box_Color"].Color
+                    BackgroundColor3 = esp_color(boxes_cfg, "Neutral")
                 });
                 
                 objects[ "7" ] = library:create( "Frame" , {
@@ -2304,7 +2338,7 @@ local config_holder
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -2, 1, -2);
                     BorderSizePixel = 0;
-                    BackgroundColor3 = flags["Box_Color"].Color
+                    BackgroundColor3 = esp_color(boxes_cfg, "Neutral")
                 });
                 
                 objects[ "7" ] = library:create( "Frame" , {
@@ -2325,7 +2359,7 @@ local config_holder
                     BorderColor3 = rgb(0, 0, 0);
                     Size = dim2(1, -2, 1, 1);
                     BorderSizePixel = 0;
-                    BackgroundColor3 = flags["Box_Color"].Color
+                    BackgroundColor3 = esp_color(boxes_cfg, "Neutral")
                 });
             -- 
             
@@ -2355,7 +2389,7 @@ local config_holder
             -- Distance esp
                 objects[ "distance" ] = library:create( "TextLabel" , {
                     FontFace = library.font;
-                    TextColor3 = flags["Distance_Color"].Color;
+                    TextColor3 = esp_color(dist_cfg, "Neutral");
                     BorderColor3 = rgb(0, 0, 0);
                     Text = "127st";
                     Parent = library.cache;
@@ -2373,7 +2407,7 @@ local config_holder
             -- Weapon esp
                 objects[ "weapon" ] = library:create( "TextLabel" , {
                     FontFace = library.font;
-                    TextColor3 = flags["Weapon_Color"].Color;
+                    TextColor3 = esp_color(weapon_cfg, "Neutral");
                     BorderColor3 = rgb(0, 0, 0);
                     Text = "[ Weapon ]";
                     Parent = library.cache;
@@ -2390,64 +2424,82 @@ local config_holder
         end 
 
         cfg.change_health = function()
-            if flags[ "healthbar_holder" ] and flags[ "healthbar_holder" ].Parent ~= objects[ "holder" ] then 
-                return 
-            end
-
+            if objects["healthbar_holder"].Parent ~= objects["holder"] then return end
             local humanoid = character:FindFirstChildOfClass("Humanoid")
             if not humanoid then return end
-            
             local multiplier = humanoid.MaxHealth * math.abs(math.sin(tick() * 2)) / humanoid.MaxHealth
-            local color = flags[ "Health_Low" ].Color:Lerp( flags["Health_High"].Color, multiplier)
-            
-            objects[ "healthbar" ].Size = UDim2.new(1, -2, multiplier, -2)
-            objects[ "healthbar" ].Position = UDim2.new(0, 1, 1 - multiplier, 1)
-            objects[ "healthbar" ].BackgroundColor3 = color
+            local amethyst = getgenv and getgenv().amethyst
+            local health_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Health"]
+            local low_c = (health_cfg and health_cfg["Low"]) or (flags["Health_Low"] and flags["Health_Low"].Color) or rgb(255, 0, 0)
+            local high_c = (health_cfg and health_cfg["High"]) or (flags["Health_High"] and flags["Health_High"].Color) or rgb(0, 255, 0)
+            local color = low_c:Lerp(high_c, multiplier)
+            objects["healthbar"].Size = UDim2.new(1, -2, multiplier, -2)
+            objects["healthbar"].Position = UDim2.new(0, 1, 1 - multiplier, 1)
+            objects["healthbar"].BackgroundColor3 = color
         end -- wtf why diff func defining
 
         function cfg.refresh_elements( )                                
             objects.holder.Parent = flags["Enabled"] and items.viewportframe or library.cache
 
-            local temp = {
-                ["Names"] = objects["name"]; 
-                ["Name_Color"] = {objects["name"]};
-                ["Healthbar"] = objects[ "healthbar_holder" ];
-                ["Distance"] = objects[ "distance" ];
-                ["Weapon"] = objects[ "weapon" ];
-                ["Distance_Color"] = {objects[ "distance" ]};
-                ["Weapon_Color"] = {objects[ "weapon" ]};
-            }
+            local amethyst = getgenv and getgenv().amethyst
+            local boxes_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Boxes"]
+            local boxes_enabled = boxes_cfg and boxes_cfg["Enabled"]
+            local names_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Names"]
+            local health_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Health"]
+            local dist_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Distance"]
+            local weapon_cfg = amethyst and amethyst["Esp"] and amethyst["Esp"]["Weapon"]
+            local show_names = names_cfg and names_cfg["Enabled"]
+            local show_health = health_cfg and health_cfg["Enabled"]
+            local show_dist = dist_cfg and dist_cfg["Enabled"]
+            local show_weapon = weapon_cfg and weapon_cfg["Enabled"]
+            local box_type = (boxes_cfg and boxes_cfg["Type"]) or (flags["Box_Type"]) or "Corner"
 
-            for flag,object in temp do 
-                if type(object) == "table" then 
-                    object[1].TextColor3 = flags[flag].Color
-                else 
-                    object.Parent = flags[flag] and objects[ "holder" ] or library.cache
-                end
-            end 
-            
-            local is_corner = flags[ "Box_Type" ] == "Corner"
+            local preview_priority = amethyst and amethyst["Esp"] and amethyst["Esp"]["PreviewPriority"]
+            local name_color = (names_cfg and names_cfg["Colors"] and (names_cfg["Colors"][preview_priority] or names_cfg["Colors"]["Neutral"])) or rgb(255, 255, 255)
+            local dist_color = (dist_cfg and dist_cfg["Colors"] and (dist_cfg["Colors"][preview_priority] or dist_cfg["Colors"]["Neutral"])) or rgb(255, 255, 255)
+            local weapon_color = (weapon_cfg and weapon_cfg["Colors"] and (weapon_cfg["Colors"][preview_priority] or weapon_cfg["Colors"]["Neutral"])) or rgb(255, 255, 255)
+            local box_color = (boxes_cfg and boxes_cfg["Colors"] and (boxes_cfg["Colors"][preview_priority] or boxes_cfg["Colors"]["Neutral"])) or rgb(255, 255, 255)
+            local filled_colors = boxes_cfg and boxes_cfg["Filled"] and boxes_cfg["Filled"]["Colors"]
+            local fill_color = (filled_colors and (filled_colors[preview_priority] or filled_colors["Neutral"])) or rgb(255, 255, 255)
+            objects["name"].Parent = show_names and objects["holder"] or library.cache
+            objects["name"].TextColor3 = name_color
+            objects["healthbar_holder"].Parent = show_health and objects["holder"] or library.cache
+            objects["distance"].Parent = show_dist and objects["holder"] or library.cache
+            objects["distance"].TextColor3 = dist_color
+            objects["weapon"].Parent = show_weapon and objects["holder"] or library.cache
+            objects["weapon"].TextColor3 = weapon_color
 
-            if flags["Boxes"] then 
-                if is_corner then 
+            if boxes_enabled then
+                if box_type == "Corner" then
                     objects[ "corners" ].Parent = objects["holder"]
                     objects[ "box_handler" ].Parent = library.cache
                     objects[ "box_outline" ].Parent = library.cache
-                else 
+                    objects[ "box_fill" ].Parent = library.cache
+                    for _, corner in objects[ "corners" ]:GetChildren() do
+                        if corner:FindFirstChild("Frame") then
+                            corner.Frame.BackgroundColor3 = box_color
+                        end
+                    end
+                else
                     objects[ "box_handler" ].Parent = objects[ "holder" ]
                     objects[ "box_outline" ].Parent = objects[ "holder" ]
                     objects[ "corners" ].Parent = library.cache
+                    objects[ "box_color" ].Color = box_color
+                    local filled = boxes_cfg and boxes_cfg["Filled"]
+                    if filled and filled["Enabled"] then
+                        objects[ "box_fill" ].Parent = objects[ "box_handler" ]
+                        objects[ "box_fill" ].BackgroundColor3 = fill_color
+                        local alpha = filled["Alpha"] or (filled["Transparency"] and (1 - filled["Transparency"]) or 0.7)
+                        objects[ "box_fill" ].BackgroundTransparency = 1 - alpha
+                    else
+                        objects[ "box_fill" ].Parent = library.cache
+                    end
                 end 
             else
-                objects[ "corners" ].Parent =  library.cache
+                objects[ "corners" ].Parent = library.cache
                 objects[ "box_handler" ].Parent = library.cache
                 objects[ "box_outline" ].Parent = library.cache
-            end 
-
-            objects[ "box_color" ].Color = flags["Box_Color"].Color 
-
-            for _, corner in objects[ "corners" ]:GetChildren() do
-                corner.Frame.BackgroundColor3 = flags["Box_Color"].Color
+                objects[ "box_fill" ].Parent = library.cache
             end
         end
 
@@ -3124,7 +3176,8 @@ local config_holder
             callback = options.callback or function() end, 
             visible = options.visible or true, 
             input_disabled = options.input or false,
-            custom_color = options.custom or nil; 
+            custom_color = options.custom or nil,
+            risky = options.risky or false,
 
             min = options.min or options.minimum or 0,
             max = options.max or options.maximum or 100,
@@ -3170,7 +3223,7 @@ local config_holder
                 TEXT_LABEL = library:create("TextLabel", {
                     Parent = left_components,
                     FontFace = library.font,
-                    TextColor3 = themes.preset.text,
+                    TextColor3 = cfg.risky and themes.preset.risky or themes.preset.text,
                     BorderColor3 = rgb(0, 0, 0),
                     Text = cfg.name,
                     Name = "text",
@@ -3180,7 +3233,8 @@ local config_holder
                     AutomaticSize = Enum.AutomaticSize.X,
                     TextSize = 12,
                     BackgroundColor3 = rgb(255, 255, 255)
-                }, "text")
+                })
+                if cfg.risky then library:apply_theme(TEXT_LABEL, "risky", "TextColor3") end
 
                 library:create("UIListLayout", {
                     Parent = left_components,
@@ -3372,6 +3426,7 @@ local config_holder
             colorpicker = options.color or nil,
             visible = options.visible or true,
             tooltip = options.tooltip or nil,
+            risky = options.risky or false,
         }
 
         -- instances
@@ -3432,7 +3487,7 @@ local config_holder
             local text = library:create("TextLabel", {
                 Parent = left_components,
                 FontFace = library.font,
-                TextColor3 = themes.preset.text,
+                TextColor3 = cfg.risky and themes.preset.risky or themes.preset.text,
                 BorderColor3 = rgb(0, 0, 0),
                 Text = cfg.name,
                 Name = "text",
@@ -3443,6 +3498,7 @@ local config_holder
                 TextSize = 12,
                 BackgroundColor3 = rgb(255, 255, 255)
             })
+            if cfg.risky then library:apply_theme(text, "risky", "TextColor3") end
         
             library:create("UIStroke", {
                 Parent = text,
@@ -3566,16 +3622,89 @@ local config_holder
     end
     
     function library:colorpicker(options)
-        local parent = self.right_holder
-        
         local cfg = {
             name = options.name or "Color", 
             flag = options.flag or tostring(2^789),
-            color = options.color or color(1, 1, 1), -- Default to white color if not provided
+            color = options.color or color(1, 1, 1),
             alpha = options.alpha or 1,
             callback = options.callback or function() end,
+            visible = options.visible ~= false,
             right_holder = self.right_holder,
+            conditional = options.conditional,
         }
+
+        local parent
+        if not self.right_holder and cfg.flag then
+            local row = library:create("TextButton", {
+                Parent = self.holder,
+                FontFace = library.font,
+                TextColor3 = rgb(151, 151, 151),
+                BorderColor3 = rgb(0, 0, 0),
+                Text = "",
+                Name = "colorpicker_row",
+                ZIndex = 1,
+                Size = dim2(1, -8, 0, 12),
+                BorderSizePixel = 0,
+                BackgroundTransparency = 1,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                AutomaticSize = Enum.AutomaticSize.Y,
+                TextYAlignment = Enum.TextYAlignment.Top,
+                TextSize = 12,
+                BackgroundColor3 = rgb(255, 255, 255)
+            })
+            local right_components = library:create("Frame", {
+                Parent = row,
+                Name = "right_components",
+                Position = dim2(1, -1, 0, 1),
+                BorderColor3 = rgb(0, 0, 0),
+                Size = dim2(0, 0, 0, 12),
+                BorderSizePixel = 0,
+                BackgroundColor3 = rgb(255, 255, 255)
+            })
+            library:create("UIListLayout", {
+                Parent = right_components,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalAlignment = Enum.HorizontalAlignment.Right,
+                Padding = dim(0, 4),
+                Name = "list",
+                SortOrder = Enum.SortOrder.LayoutOrder
+            })
+            library:create("UIPadding", { Parent = row })
+            local left_components = library:create("Frame", {
+                Parent = row,
+                Name = "left_components",
+                BackgroundTransparency = 1,
+                Position = dim2(0, 0, 0, 0),
+                BorderColor3 = rgb(0, 0, 0),
+                Size = dim2(0, 0, 0, 14),
+                BorderSizePixel = 0,
+                BackgroundColor3 = rgb(255, 255, 255)
+            })
+            library:create("TextLabel", {
+                Parent = left_components,
+                FontFace = library.font,
+                TextColor3 = themes.preset.text,
+                BorderColor3 = rgb(0, 0, 0),
+                Text = cfg.name,
+                Name = "text",
+                BackgroundTransparency = 1,
+                Size = dim2(0, 0, 1, -1),
+                BorderSizePixel = 0,
+                AutomaticSize = Enum.AutomaticSize.X,
+                TextSize = 12,
+                BackgroundColor3 = rgb(255, 255, 255)
+            })
+            local lbl = left_components:FindFirstChild("text")
+            if lbl then library:create("UIStroke", { Parent = lbl, LineJoinMode = Enum.LineJoinMode.Miter }) end
+            library:create("UIListLayout", { Parent = left_components, Padding = dim(0, 5), Name = "_", FillDirection = Enum.FillDirection.Horizontal })
+            cfg.set_element_visible = function(bool) row.Visible = bool end
+            library.visible_flags[cfg.flag] = cfg.set_element_visible
+            cfg.set_element_visible(cfg.visible)
+            parent = right_components
+        else
+            parent = self.right_holder
+        end
 
         local dragging_sat = false 
         local dragging_hue = false 
@@ -3584,8 +3713,7 @@ local config_holder
         local h, s, v = cfg.color:ToHSV() 
         local a = cfg.alpha 
         
-        -- colorpicker button 
-            local colorpicker_button = library:create("TextButton", {
+        local colorpicker_button = library:create("TextButton", {
                 Parent = parent,
                 Name = "outline",
                 BorderColor3 = rgb(0, 0, 0),
@@ -3619,6 +3747,12 @@ local config_holder
             })
 
             library:hoverify(colorpicker_button, colorpicker_button)
+
+            if cfg.conditional and cfg.flag then
+                cfg.set_element_visible = function(bool) colorpicker_button.Visible = bool end
+                library.visible_flags[cfg.flag] = cfg.set_element_visible
+                cfg.set_element_visible(cfg.visible)
+            end
         
             local UIGradient = library:create("UIGradient", {
                 Parent = handler,
@@ -3738,11 +3872,13 @@ local config_holder
             section:button_holder({})
             section:button({name = "Copy", callback = function()
                 library.copied_flag = flags[cfg.flag]
-                library.is_rainbow = cfg.flag .. "_RAINBOW_FLAG"
+                library.copied_rainbow = RainbowToggle.enabled
             end})
             section:button({name = "Paste", callback = function()
-                RainbowToggle.set(library.is_rainbow)
-                cfg.set(library.copied_flag.Color, library.copied_flag.Transparency)
+                if library.copied_flag then
+                    RainbowToggle.set(library.copied_rainbow or false)
+                    cfg.set(library.copied_flag.Color, library.copied_flag.Transparency)
+                end
             end})
 
             local main_holder_inline = library:create("Frame", {
@@ -4572,6 +4708,8 @@ local config_holder
             callback = options.callback or function() end,
             multi = options.multi or false, 
             visible = options.visible or true,
+            risky = options.risky or false,
+            risky_values = options.risky_values or {},
 
             open = false, 
             option_instances = {}, 
@@ -4617,7 +4755,7 @@ local config_holder
                 main_text = library:create("TextLabel", {
                     Parent = left_components,
                     FontFace = library.font,
-                    TextColor3 = themes.preset.text,
+                    TextColor3 = cfg.risky and themes.preset.risky or themes.preset.text,
                     BorderColor3 = rgb(0, 0, 0),
                     Text = cfg.name,
                     Name = "text",
@@ -4628,6 +4766,7 @@ local config_holder
                     TextSize = 12,
                     BackgroundColor3 = rgb(255, 255, 255)
                 })
+                if cfg.risky then library:apply_theme(main_text, "risky", "TextColor3") end
                 
                 library:create("UIStroke", {
                     Parent = main_text,
@@ -4946,6 +5085,9 @@ local config_holder
             end
 
             text.Text = is_table and concat(selected, ", ") or selected[1] or "nun"
+            local display_val = selected[1]
+            local is_risky = display_val and find(cfg.risky_values, display_val)
+            text.TextColor3 = is_risky and themes.preset.risky or themes.preset.text
             flags[cfg.flag] = is_table and selected or selected[1]
             cfg.callback(flags[cfg.flag]) 
         end
@@ -5599,7 +5741,11 @@ local config_holder
     end 
 
     function library:label(options)
-        local cfg = {name = options.text or options.name or "Label"}
+        local cfg = {
+            name = options.text or options.name or "Label",
+            flag = options.flag,
+            visible = options.visible ~= false,
+        }
 
         local dropdown = library:create("TextLabel", {
             Parent = self.holder,
@@ -5675,9 +5821,42 @@ local config_holder
             Name = ""
         })
 
-        function cfg.set(text) 
+        function cfg.set(text, copy_value) 
             TextLabel.Text = text 
-        end 
+            if options.copy_button and copy_value ~= nil then
+                cfg.copy_value = copy_value
+            end
+        end
+
+        if options.copy_button then
+            cfg.copy_value = ""
+            local copy_btn = library:create("TextButton", {
+                Parent = right_components,
+                Name = "",
+                FontFace = library.font,
+                Text = "Copy",
+                TextColor3 = themes.preset.text,
+                BorderColor3 = rgb(0, 0, 0),
+                TextSize = 11,
+                Size = dim2(0, 36, 0, 18),
+                BorderSizePixel = 0,
+                BackgroundColor3 = themes.preset.inline,
+                LayoutOrder = 1
+            })
+            library:apply_theme(copy_btn, "inline", "BackgroundColor3")
+            library:apply_theme(copy_btn, "text", "TextColor3")
+            copy_btn.MouseButton1Click:Connect(function()
+                if cfg.copy_value and cfg.copy_value ~= "" then
+                    setclipboard(cfg.copy_value)
+                end
+            end)
+        end
+
+        if cfg.flag then
+            cfg.set_element_visible = function(bool) dropdown.Visible = bool end
+            library.visible_flags[cfg.flag] = cfg.set_element_visible
+            cfg.set_element_visible(cfg.visible)
+        end
                     
         return setmetatable(cfg, library)   
     end 
@@ -5996,9 +6175,9 @@ local config_holder
                 library.config_flags["PLAYERLIST_DROPDOWN"](path.priority_text.Text)
 
                 if cfg.labels.name then 
-                    cfg.labels.name.set("User: " .. username)
-                    cfg.labels.display.set("DisplayName: " .. players[username].DisplayName)
-                    cfg.labels.uid.set("User Id: " .. players[username].UserId)
+                    cfg.labels.name.set("User: " .. username, username)
+                    cfg.labels.display.set("DisplayName: " .. players[username].DisplayName, tostring(players[username].DisplayName))
+                    cfg.labels.uid.set("User Id: " .. players[username].UserId, tostring(players[username].UserId))
                 end
             end)
 
